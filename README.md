@@ -14,7 +14,11 @@ Touch:bit has 6 touch sensitive buttons paired with 6 LEDs.
 
 ### Do something when a button is pressed/released
 
-You can call a function when a button is pressed or released using `touchbit.on`.
+You can call a function when a button is pressed or released using `touchbit.on`:
+
+```typescript
+touchbit.on(touchpad: TouchPad, event: TouchEvent, handler: Action)
+```
 
 Example:
 
@@ -31,6 +35,10 @@ touchbit.on(touchbit.TouchPad.d, touchbit.TouchEvent.released, () => {
 ### Light up an LED
 
 After switching LEDs to manual control (see below) you can turn them on/off at will.
+
+```typescript
+touchbit.setLight(light: TouchPad, state: number)
+```
 
 Each LED is referred to by its associated pad. If you wanted to turn the left-most LED on, you would do:
 
