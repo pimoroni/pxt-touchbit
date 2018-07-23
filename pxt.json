@@ -1,0 +1,17 @@
+{
+    "name": "touchbit",
+    "version": "0.0.1",
+    "description": "Pimoroni Touch:Bit",
+    "license": "MIT",
+    "dependencies": {
+        "core": "*"
+    },
+    "files": [
+        "README.md",
+        "touchbit.ts"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "public": true
+}
