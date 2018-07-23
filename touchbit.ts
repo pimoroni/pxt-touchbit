@@ -140,7 +140,7 @@ namespace touchbit {
 
 
     let is_setup: boolean = false;
-    let actions: Action[] = [
+    let handlers_pressed: Action[] = [
         () => { },
         () => { },
         () => { },
@@ -148,7 +148,30 @@ namespace touchbit {
         () => { },
         () => { },
     ];
+    let handlers_released: Action[] = [
+        () => { },
+        () => { },
+        () => { },
+        () => { },
+        () => { },
+        () => { },
+    ];
+    /*let handlers_held: Action[] = [
+        () => { },
+        () => { },
+        () => { },
+        () => { },
+        () => { },
+        () => { },
+    ];*/
     let last_button_states: number = 0;
+
+    //% block
+    export enum TouchEvent {
+        released = 0,
+        pressed = 1,
+        held = 2
+    }
 
     //% block
     export enum TouchPad {
@@ -197,12 +220,23 @@ namespace touchbit {
         return ((1 << length) - 1) - input;
     }
 
-    //% blockId=touchbit_on_press
-    //% block="On touch pad %touchpad|press"
+    //% blockId=touchbit_on
+    //% block="On touch pad %touchpad|%event"
     //% touchpad.fieldEditor="gridpicker" touchpad.fieldOptions.columns=6
-    export function onPress(touchpad: TouchPad, handler: Action) {
+    //% event.fieldEditor="gridpicker" event.fieldOptions.columns=2
+    export function on(touchpad: TouchPad, event: TouchEvent, handler: Action) {
         setup();
-        actions[touchpad] = handler;
+        switch (event) {
+            case TouchEvent.released:
+                handlers_released[touchpad] = handler;
+                break;
+            case TouchEvent.pressed:
+                handlers_pressed[touchpad] = handler;
+                break;
+            //case TouchEvent.held:
+            //    handlers_held[touchpad] = handler;
+            //    break;
+        }
     }
 
     function setup(): void {
@@ -223,20 +257,34 @@ namespace touchbit {
     function poll() {
         if (smbus.readByte(ADDR, REG.MAIN_CONTROL) & 0b1) {
             smbus.writeByte(ADDR, REG.MAIN_CONTROL, 0x00);
+
+            //let threshold: any = smbus.readBuffer(ADDR, REG.INPUT_1_THRESH, 6);
+            //let delta: any = smbus.readBuffer(ADDR, REG.INPUT_1_DELTA, 6);
+
             let button_states = smbus.readByte(ADDR, REG.INPUT_STATUS);
             let changed = button_states ^ last_button_states;
             last_button_states = button_states;
             for (let x = 0; x < 6; x++){
                 let mask = 0b1 << x;
-                if (button_states & mask && changed & mask) {
-                    triggerHandler(x);
+                if (changed & mask) {
+                    triggerHandler(x, (button_states & mask) ? TouchEvent.pressed : TouchEvent.released);
                 }
             }
         }    
     }
 
-    function triggerHandler(touchpad: TouchPad) {
-        actions[touchpad]();
+    function triggerHandler(touchpad: TouchPad, event: TouchEvent) {
+        switch (event) {
+            case TouchEvent.released:
+                handlers_released[touchpad]();
+                break;
+            case TouchEvent.pressed:
+                handlers_pressed[touchpad]();
+                break;
+            //case TouchEvent.held:
+            //    handlers_held[touchpad]();
+            //    break;
+        }
     }
 }
 
