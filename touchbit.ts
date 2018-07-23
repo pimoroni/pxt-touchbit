@@ -160,14 +160,6 @@ namespace touchbit {
         right = 5
     }
 
-    function setup(): void {
-        if (is_setup) return;
-        is_setup = true;
-
-        smbus.writeByte(ADDR, REG.CALIBRATION, 0xFF); // Force recalibration on startup
-        smbus.writeByte(ADDR, REG.LED_LINKING, 0b00111111); // Link LEDs by default
-    }
-
     /**
      * Set touch:bit lights,
      * either to automatic or manual mode.
@@ -202,12 +194,7 @@ namespace touchbit {
     }
 
     function bitwiseInvert(input: number, length: number = 8): number {
-        let output: number = 0;
-        for (let x = 0; x < length; x++){
-            let mask: number = (0b1 << x);
-            output |= (input & mask) ? 0 : mask;
-        }
-        return output
+        return ((1 << length) - 1) - input;
     }
 
     //% blockId=touchbit_on_press
@@ -218,10 +205,22 @@ namespace touchbit {
         actions[touchpad] = handler;
     }
 
-    //% blockId=touchbit_poll
-    //% block="Check for new touch events"
-    export function poll() {
-        setup();
+    function setup(): void {
+        if (is_setup) return;
+        is_setup = true;
+
+        smbus.writeByte(ADDR, REG.CALIBRATION, 0xFF); // Force recalibration on startup
+        smbus.writeByte(ADDR, REG.LED_LINKING, 0b00111111); // Link LEDs by default
+
+        control.inBackground(() => {
+            while (true) {
+                poll();
+                basic.pause(10);
+            }    
+        })
+    }
+
+    function poll() {
         if (smbus.readByte(ADDR, REG.MAIN_CONTROL) & 0b1) {
             smbus.writeByte(ADDR, REG.MAIN_CONTROL, 0x00);
             let button_states = smbus.readByte(ADDR, REG.INPUT_STATUS);

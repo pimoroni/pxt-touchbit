@@ -12,8 +12,7 @@ touchbit.onPress(touchbit.TouchPad.b, () => {
 })
 
 basic.forever(() => {
-    touchbit.poll();
     touchbit.setLight(touchbit.TouchPad.a, blink ? 1 : 0);
     blink = !blink;
-    basic.pause(10);
+    basic.pause(1000);
 })
