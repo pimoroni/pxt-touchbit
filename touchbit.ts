@@ -1,4 +1,4 @@
-//% weight=100 color=#000000 icon="\uf087" block="Touch:Bit"
+//% weight=100 color=#000000 icon="\uf0a6" block="Touch:Bit"
 namespace touchbit {
     const ADDR: number = 0x2C;
     const enum REG {
@@ -169,8 +169,8 @@ namespace touchbit {
     //% block
     export enum TouchEvent {
         released = 0,
-        pressed = 1,
-        held = 2
+        pressed = 1
+        //held = 2
     }
 
     //% block
@@ -189,6 +189,7 @@ namespace touchbit {
      */
     //% blockId=touchbit_light_mode_automatic
     //% block="Set lights to automatic"
+    //% weight=40
     export function lightModeAutomatic(): void {
         setup();
         smbus.writeByte(ADDR, REG.LED_LINKING, 0b00111111);
@@ -196,6 +197,7 @@ namespace touchbit {
 
     //% blockId=touchbit_light_mode_manual
     //% block="Set lights to manual"
+    //% weight=60
     export function lightModeManual(): void {
         setup();
         smbus.writeByte(ADDR, REG.LED_LINKING, 0b00000000);
@@ -206,6 +208,7 @@ namespace touchbit {
     //% block="Set light %light| to %state"
     //% state.min=0 state.max=1 state.defl=0
     //% light.fieldEditor="gridpicker" light.fieldOptions.columns=6
+    //% weight=80
     export function setLight(light: TouchPad, state: number): void {
         setup();
         let current_led_status = smbus.readByte(ADDR, REG.LED_OUTPUT_CON);
@@ -221,9 +224,10 @@ namespace touchbit {
     }
 
     //% blockId=touchbit_on
-    //% block="On touch pad %touchpad|%event"
+    //% block="When touch pad %touchpad| is %event"
     //% touchpad.fieldEditor="gridpicker" touchpad.fieldOptions.columns=6
     //% event.fieldEditor="gridpicker" event.fieldOptions.columns=2
+    //% weight=100
     export function on(touchpad: TouchPad, event: TouchEvent, handler: Action) {
         setup();
         switch (event) {
